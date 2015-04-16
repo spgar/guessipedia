@@ -132,7 +132,7 @@ $(document).ready(function() {
 
     function finishedCollectingQuizPages() {
         // Show the hint.
-        $('#hint')[0].innerHTML = 'Hint: ' + quizExtracts[0][randomInt(0, quizExtracts[0].length - 1)];
+        $('#hint').html('Hint: ' + quizExtracts[0][randomInt(0, quizExtracts[0].length - 1)]);
 
         // Show all of the answers
         quizPages.forEach(function(quizPage) {
@@ -154,7 +154,7 @@ $(document).ready(function() {
     }
 
     function correctAnswer() {
-        $('#result')[0].innerHTML = 'Correct!';
+        $('#result').html('Correct!');
         round += 1;
 
         var button = $('<button/>', {
@@ -165,7 +165,7 @@ $(document).ready(function() {
     }
 
     function incorrectAnswer() {
-        $('#result')[0].innerHTML = 'WRONG';
+        $('#result').html('WRONG');
         round = 1;
 
         var button = $('<button/>', {
@@ -182,15 +182,15 @@ $(document).ready(function() {
     function clearQuiz() {
         quizPages = [];
         quizExtracts = [];
-        $('#hint')[0].innerHTML = '';
-        $('#result')[0].innerHTML = '';
+        $('#hint').html('');
+        $('#result').html('');
         $('#nextRound').empty();
         $('#answers').empty();
     }
 
     function kickOff() {
         clearQuiz();
-        $('#round')[0].innerHTML = 'Round: ' + round;
+        $('#round').html('Round: ' + round);
         collectQuizPages();
     }
 
