@@ -1,5 +1,5 @@
 # guessipedia
-A browser game based on Wikipedia.
+A trivia game based on Wikipedia.
 
 ## License
 
