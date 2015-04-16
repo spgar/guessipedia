@@ -5,8 +5,9 @@ $(document).ready(function() {
 
     'use strict';
 
-    var round = 4;
     var REPLACEMENT_STRING = '_____';
+
+    var round = 1;
     var quizPages = [];
     var quizExtracts = [];
     var wikiFetcher = new WikiFetcher();
@@ -135,16 +136,53 @@ $(document).ready(function() {
 
         // Show all of the answers
         quizPages.forEach(function(quizPage) {
-            $('#answers').append('<li>' + quizPage + '</li>');
+            var button = $('<button/>', {
+                text: quizPage,
+                click: function () {
+                    if (quizPage === quizPages[0]) {
+                        correctAnswer();
+                    } else {
+                        incorrectAnswer();
+                    }
+                }
+            });
+
+            $('#answers').append(button);
         });
+    }
+
+    function correctAnswer() {
+        $('#result')[0].innerHTML = 'Correct!';
+        round += 1;
+
+        var button = $('<button/>', {
+                text: 'Next Round',
+                click: kickOff,
+        });
+        $('#nextRound').append(button);
+    }
+
+    function incorrectAnswer() {
+        $('#result')[0].innerHTML = 'WRONG';
+        round = 1;
     }
 
     function collectQuizPages() {
         wikiFetcher.fetchRandomPage(addValidToQuizPages);
     }
 
-    function kickOff() {
+    function clearQuiz() {
         quizPages = [];
+        quizExtracts = [];
+        $('#hint')[0].innerHTML = '';
+        $('#result')[0].innerHTML = '';
+        $('#nextRound').empty();
+        $('#answers').empty();
+    }
+
+    function kickOff() {
+        clearQuiz();
+        $('#round')[0].innerHTML = 'Round: ' + round;
         collectQuizPages();
     }
 
