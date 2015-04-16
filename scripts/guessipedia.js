@@ -37,7 +37,7 @@ $(document).ready(function() {
         splitWord.forEach(function(word) {
             if (word.length > 1) {
                 // Skip some common, small words.
-                if ($.inArray(word, ['on', 'and', 'the', 'of', 'in', 'is']) === -1) {
+                if ($.inArray(word, ['on', 'and', 'the', 'of', 'in', 'is', 'at']) === -1) {
                     re = new RegExp('\\b' + word + '\\b', 'gi');
                     splitSentences = splitSentences.map(function(s) { return s.replace(re, REPLACEMENT_STRING); });
                 }
@@ -139,6 +139,8 @@ $(document).ready(function() {
             var button = $('<button/>', {
                 text: quizPage,
                 click: function () {
+                    $('#answers :button').attr('disabled', true);
+
                     if (quizPage === quizPages[0]) {
                         correctAnswer();
                     } else {
@@ -165,6 +167,12 @@ $(document).ready(function() {
     function incorrectAnswer() {
         $('#result')[0].innerHTML = 'WRONG';
         round = 1;
+
+        var button = $('<button/>', {
+                text: 'Start Over',
+                click: kickOff,
+        });
+        $('#nextRound').append(button);
     }
 
     function collectQuizPages() {
