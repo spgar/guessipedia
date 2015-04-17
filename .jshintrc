@@ -27,4 +27,7 @@
     "jquery": true
 
     // Custom Globals
+    "globals": {
+        "_": false
+    }
 }

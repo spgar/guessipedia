@@ -7,13 +7,15 @@ $(document).ready(function() {
 
     var REPLACEMENT_STRING = '_____';
 
-    var round = 1;
+    var score = 0;
+    var maxScore = 0;
+    var truth = '';
     var quizPages = [];
     var quizExtracts = [];
     var wikiFetcher = new WikiFetcher();
 
     function getNumQuizWords() {
-        return round + 1;
+        return score + 2;
     }
 
     function processExtractIntoSentences(extract, pageName) {
@@ -134,14 +136,17 @@ $(document).ready(function() {
         // Show the hint.
         $('#hint').html('Hint: ' + quizExtracts[0][randomInt(0, quizExtracts[0].length - 1)]);
 
+        // Choose a correct answer and then mix up the possibilities.
+        truth = quizPages[0];
+        var shuffledQuizPages = _.shuffle(quizPages);
+
         // Show all of the answers
-        quizPages.forEach(function(quizPage) {
+        shuffledQuizPages.forEach(function(quizPage) {
             var button = $('<button/>', {
                 text: quizPage,
                 click: function () {
                     $('#answers :button').attr('disabled', true);
-
-                    if (quizPage === quizPages[0]) {
+                    if (quizPage === truth) {
                         correctAnswer();
                     } else {
                         incorrectAnswer();
@@ -155,7 +160,10 @@ $(document).ready(function() {
 
     function correctAnswer() {
         $('#result').html('Correct!');
-        round += 1;
+        score += 1;
+        if (score > maxScore) {
+            maxScore = score;
+        }
 
         var button = $('<button/>', {
                 text: 'Next Round',
@@ -165,8 +173,8 @@ $(document).ready(function() {
     }
 
     function incorrectAnswer() {
-        $('#result').html('WRONG');
-        round = 1;
+        $('#result').html('WRONG. Correct answer: ' + truth);
+        score = 0;
 
         var button = $('<button/>', {
                 text: 'Start Over',
@@ -182,6 +190,7 @@ $(document).ready(function() {
     function clearQuiz() {
         quizPages = [];
         quizExtracts = [];
+        truth = '';
         $('#hint').html('');
         $('#result').html('');
         $('#nextRound').empty();
@@ -190,7 +199,7 @@ $(document).ready(function() {
 
     function kickOff() {
         clearQuiz();
-        $('#round').html('Round: ' + round);
+        $('#score').html('Score: ' + score + ' (max: ' + maxScore + ')');
         collectQuizPages();
     }
 
