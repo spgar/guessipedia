@@ -176,13 +176,18 @@ $(document).ready(function() {
         button.bind('click', kickOff);
     }
 
-    function correctAnswer() {
-        $('#result').html('Correct!');
-        score += 1;
+    function setScore(newScore) {
+        score = newScore;
         if (score > maxScore) {
             maxScore = score;
         }
 
+        $('#score').html('Score: ' + score + ' (max: ' + maxScore + ')');
+    }
+
+    function correctAnswer() {
+        $('#result').html('Correct!');
+        setScore(score + 1);
         addContinueButton('Next Round');
     }
 
@@ -193,7 +198,7 @@ $(document).ready(function() {
 
     function incorrectAnswer() {
         $('#result').html('WRONG. Correct answer: ' + getCorrectAnswerLink());
-        score = 0;
+        setScore(0);
 
         addContinueButton('Start Over');
     }
@@ -204,15 +209,15 @@ $(document).ready(function() {
 
     function clearQuiz() {
         articles = [];
-        $('#hint').html('');
-        $('#result').html('');
+        setScore(0);
+        $('#hint').empty();
+        $('#result').empty();
         $('#continue').empty();
         $('#answers').empty();
     }
 
     function kickOff() {
         clearQuiz();
-        $('#score').html('Score: ' + score + ' (max: ' + maxScore + ')');
         collectArticles();
     }
 
