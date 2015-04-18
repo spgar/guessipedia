@@ -103,6 +103,11 @@ $(document).ready(function() {
             return false;
         }
 
+        // 'can refer to' isn't great either.
+        if (extract.indexOf('can refer to') > -1) {
+            return false;
+        }
+
         return true;
     }
 
@@ -190,7 +195,7 @@ $(document).ready(function() {
     }
 
     function correctAnswer() {
-        $('#result').html('Correct! Learn more about: ' + getCorrectAnswerLink());
+        $('#result').html('<span class="correctText">Correct!</span> Learn more about: ' + getCorrectAnswerLink());
         scrollToResult();
 
         setScore(score + 1);
@@ -203,7 +208,7 @@ $(document).ready(function() {
     }
 
     function incorrectAnswer() {
-        $('#result').html('WRONG. Correct answer: ' + getCorrectAnswerLink());
+        $('#result').html('<span class="incorrectText">WRONG.</span> Correct answer: ' + getCorrectAnswerLink());
         scrollToResult();
 
         setScore(0);
