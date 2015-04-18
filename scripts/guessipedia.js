@@ -103,8 +103,12 @@ $(document).ready(function() {
             return false;
         }
 
-        // 'can refer to' isn't great either.
+        // 'can refer to' or 'might refer to' aren't great either.
         if (extract.indexOf('can refer to') > -1) {
+            return false;
+        }
+
+        if (extract.indexOf('might refer to') > -1) {
             return false;
         }
 
