@@ -142,6 +142,10 @@ $(document).ready(function() {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
+    function disableAllAnswerButtons() {
+        $('.answerButton').addClass('ui-disabled');
+    }
+
     function finishedCollectingArticles() {
         // Show the hint.
         var sentences = articles[0].extractSentences;
@@ -150,22 +154,26 @@ $(document).ready(function() {
         // Choose a correct answer and then mix up the articles.
         var shuffledArticles = _.shuffle(articles);
 
-        // Show all of the answers
+        // Setup all of the answer buttons.
         shuffledArticles.forEach(function(article) {
-            var button = $('<button/>', {
-                text: article.processedTitle,
-                click: function () {
-                    $('#answers :button').attr('disabled', true);
-                    if (article.processedTitle === articles[0].processedTitle) {
-                        correctAnswer();
-                    } else {
-                        incorrectAnswer();
-                    }
+            var button = $('<a data-role="button" data-id="' + article.processedTitle + '">' + article.processedTitle + '</a>');
+            $(button).addClass('answerButton');
+            $('#answers').append(button).trigger('create');
+            button.bind('click', function() {
+                disableAllAnswerButtons();
+                if (article.processedTitle === articles[0].processedTitle) {
+                    correctAnswer();
+                } else {
+                    incorrectAnswer();
                 }
             });
-
-            $('#answers').append(button);
         });
+    }
+
+    function addContinueButton(text) {
+        var button = $('<a data-role="button">' + text + '</a>');
+        $('#continue').append(button).trigger('create');
+        button.bind('click', kickOff);
     }
 
     function correctAnswer() {
@@ -175,11 +183,7 @@ $(document).ready(function() {
             maxScore = score;
         }
 
-        var button = $('<button/>', {
-                text: 'Next Round',
-                click: kickOff,
-        });
-        $('#nextRound').append(button);
+        addContinueButton('Next Round');
     }
 
     function getCorrectAnswerLink() {
@@ -191,11 +195,7 @@ $(document).ready(function() {
         $('#result').html('WRONG. Correct answer: ' + getCorrectAnswerLink());
         score = 0;
 
-        var button = $('<button/>', {
-                text: 'Start Over',
-                click: kickOff,
-        });
-        $('#nextRound').append(button);
+        addContinueButton('Start Over');
     }
 
     function collectArticles() {
@@ -206,7 +206,7 @@ $(document).ready(function() {
         articles = [];
         $('#hint').html('');
         $('#result').html('');
-        $('#nextRound').empty();
+        $('#continue').empty();
         $('#answers').empty();
     }
 

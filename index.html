@@ -2,16 +2,29 @@
 <html>
 <head>
     <title>guessipedia</title>
-</head>
-<body>
-    <div id="score"></div>
-    <div id="hint"></div>
-    <div id="answers"></div>
-    <div id="result"></div>
-    <div id="nextRound"></div>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.7.0/lodash.min.js"></script>
+</head>
+<body>
+
+    <div data-role="page">
+        <div data-role="header">
+        <h1>guessipedia - Guess the wikipedia article!</h1>
+        </div>
+        <div data-role="main" class="ui-content">
+            <div id="score"></div>
+            <div id="hint"></div>
+            <div id="answers"></div>
+            <div id="result"></div>
+            <div id="continue"></div>
+        </div>
+        <div data-role="footer">
+        </div>
+    </div>
 
     <script src="scripts/wikifetcher.js"></script>
     <script src="scripts/guessipedia.js"></script>
