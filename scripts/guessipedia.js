@@ -7,20 +7,19 @@ $(document).ready(function() {
 
     var REPLACEMENT_STRING = '_____';
 
+    var wikiFetcher = new WikiFetcher();
+
     var score = 0;
     var maxScore = 0;
-    var truth = '';
-    var quizPages = [];
-    var quizExtracts = [];
-    var wikiFetcher = new WikiFetcher();
+    var articles = {};
 
     function getNumQuizWords() {
         return score + 2;
     }
 
-    function processExtractIntoSentences(extract, pageName) {
-        // Get rid of anything in parenthesis within the page name.
-        pageName = pageName.replace(/\s*\(.*?\)\s*/g, '');
+    function processExtractIntoSentences(extract, title) {
+        // Get rid of anything in parenthesis within the title.
+        title = title.replace(/\s*\(.*?\)\s*/g, '');
 
         // Try to strip out middle initials, they seem to come up a lot.
         // 'Douglas R. White' -> 'Douglas White'
@@ -30,15 +29,15 @@ $(document).ready(function() {
         // processing, but this regular expression works ok (not great).
         var splitSentences = extract.replace(/([.?!])\s*(?=\s[A-Z])/g, '$1|').split('|');
 
-        // Replace any instances of the goal page name with REPLACEMENT_STRING
-        var re = new RegExp(pageName, 'gi');
+        // Replace any instances of the goal title with REPLACEMENT_STRING
+        var re = new RegExp(title, 'gi');
         splitSentences = splitSentences.map(function(s) { return s.replace(re, REPLACEMENT_STRING); });
 
-        // Also replace any individual word in the pagename to be safe? Only if it's proper.
-        var splitWord = pageName.split(/[\s,]+/);
+        // Also replace any individual word in the title to be safe? Only if it's proper.
+        var splitWord = title.split(/[\s,]+/);
         splitWord.forEach(function(word) {
             if (word.length > 1) {
-                // Skip some common, small words.
+                // Skip replacing some common, small words.
                 if ($.inArray(word, ['on', 'and', 'the', 'of', 'in', 'is', 'at']) === -1) {
                     re = new RegExp('\\b' + word + '\\b', 'gi');
                     splitSentences = splitSentences.map(function(s) { return s.replace(re, REPLACEMENT_STRING); });
@@ -49,35 +48,8 @@ $(document).ready(function() {
         return splitSentences;
     }
 
-    function isValidQuizPage(pageName) {
-        // Already have enough words.
-        if (quizPages.length >= getNumQuizWords()) {
-            return false;
-        }
-
-        // This is a duplicate.
-        quizPages.forEach(function(quizPage) {
-            if (quizPage === pageName) {
-                return false;
-            }
-        });
-
-        // Don't deal with 'list of' pages.
-        if (pageName.indexOf('List of') > -1) {
-            return false;
-        }
-
-        // Some pages have a . in it. Problematic!
-        if (pageName.indexOf('.') > -1) {
-            return false;
-        }
-
-        // Otherwise it's ok.
-        return true;
-    }
-
-    function processPageName(pageName) {
-        return pageName.replace(/ *\([^)]*\) */g, '');
+    function processTitle(title) {
+        return title.replace(/ *\([^)]*\) */g, '');
     }
 
     function processExtract(extract) {
@@ -88,18 +60,45 @@ $(document).ready(function() {
         return extract;
     }
 
+    function isValidTitle(title) {
+        // Already have enough articles.
+        if (articles.length >= getNumQuizWords()) {
+            return false;
+        }
+
+        // This is a duplicate.
+        articles.forEach(function(article) {
+            if (article.processedTitle === title) {
+                return false;
+            }
+        });
+
+        // Don't deal with 'list of' articles.
+        if (title.indexOf('List of') > -1) {
+            return false;
+        }
+
+        // Some articles have a . in the title. Problematic!
+        if (title.indexOf('.') > -1) {
+            return false;
+        }
+
+        // Otherwise it's ok.
+        return true;
+    }
+
     function isValidExtract(extract) {
         // Sometimes the extract is undefined or has 0 length. Not sure why.
         if (extract === undefined || extract.length === 0) {
             return false;
         }
 
-        // Don't deal with disambiguation pages.
+        // Don't deal with disambiguation articles.
         if (extract.indexOf('may refer to') > -1) {
             return false;
         }
 
-        // Don't deal with 'list of' pages.
+        // Don't deal with 'list of' articles.
         if (extract.indexOf('list of') > -1) {
             return false;
         }
@@ -107,24 +106,35 @@ $(document).ready(function() {
         return true;
     }
 
-    function addValidToQuizPages(pageName, extract) {
-        // Do some filtering on pageName and extract
-        pageName = processPageName(pageName);
-        extract = processExtract(extract);
-        if (isValidQuizPage(pageName) && isValidExtract(extract)) {
-            var extractSentences = processExtractIntoSentences(extract, pageName);
-            quizExtracts.push(extractSentences);
-            quizPages.push(pageName);
+    function isValidArticle(title, extract) {
+        return isValidTitle(title) && isValidExtract(extract);
+    }
+
+    function addArticle(title, id, extract) {
+        // Do some filtering on title and extract
+        var processedTitle = processTitle(title);
+        var processedExtract = processExtract(extract);
+
+        if (isValidArticle(processedTitle, processedExtract)) {
+            var extractSentences = processExtractIntoSentences(processedExtract, processedTitle);
+            var article = {
+                title: title,
+                id: id,
+                processedTitle: processedTitle,
+                extract: extract,
+                extractSentences: extractSentences
+            };
+            articles.push(article);
         }
 
-        // Go back and collect more quiz pages if necessary.
-        if (quizPages.length < getNumQuizWords()) {
-            collectQuizPages();
-        } else if (quizPages.length === getNumQuizWords()) {
-            finishedCollectingQuizPages();
+        // Go back and collect more articles if necessary.
+        if (articles.length < getNumQuizWords()) {
+            collectArticles();
+        } else if (articles.length === getNumQuizWords()) {
+            finishedCollectingArticles();
         } else {
             // SPGTODO: Something better.
-            console.log('Big problem.');
+            console.log('Big problem!');
         }
     }
 
@@ -132,21 +142,21 @@ $(document).ready(function() {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
-    function finishedCollectingQuizPages() {
+    function finishedCollectingArticles() {
         // Show the hint.
-        $('#hint').html('Hint: ' + quizExtracts[0][randomInt(0, quizExtracts[0].length - 1)]);
+        var sentences = articles[0].extractSentences;
+        $('#hint').html('Hint: ' + sentences[randomInt(0, sentences.length - 1)]);
 
-        // Choose a correct answer and then mix up the possibilities.
-        truth = quizPages[0];
-        var shuffledQuizPages = _.shuffle(quizPages);
+        // Choose a correct answer and then mix up the articles.
+        var shuffledArticles = _.shuffle(articles);
 
         // Show all of the answers
-        shuffledQuizPages.forEach(function(quizPage) {
+        shuffledArticles.forEach(function(article) {
             var button = $('<button/>', {
-                text: quizPage,
+                text: article.processedTitle,
                 click: function () {
                     $('#answers :button').attr('disabled', true);
-                    if (quizPage === truth) {
+                    if (article.processedTitle === articles[0].processedTitle) {
                         correctAnswer();
                     } else {
                         incorrectAnswer();
@@ -172,8 +182,13 @@ $(document).ready(function() {
         $('#nextRound').append(button);
     }
 
+    function getCorrectAnswerLink() {
+        return '<a href="' + 'http://en.wikipedia.org/?curid=' + articles[0].id +
+               '" target="_blank">' + articles[0].processedTitle + '</a>';
+    }
+
     function incorrectAnswer() {
-        $('#result').html('WRONG. Correct answer: ' + truth);
+        $('#result').html('WRONG. Correct answer: ' + getCorrectAnswerLink());
         score = 0;
 
         var button = $('<button/>', {
@@ -183,14 +198,12 @@ $(document).ready(function() {
         $('#nextRound').append(button);
     }
 
-    function collectQuizPages() {
-        wikiFetcher.fetchRandomPage(addValidToQuizPages);
+    function collectArticles() {
+        wikiFetcher.fetchRandomArticle(addArticle);
     }
 
     function clearQuiz() {
-        quizPages = [];
-        quizExtracts = [];
-        truth = '';
+        articles = [];
         $('#hint').html('');
         $('#result').html('');
         $('#nextRound').empty();
@@ -200,7 +213,7 @@ $(document).ready(function() {
     function kickOff() {
         clearQuiz();
         $('#score').html('Score: ' + score + ' (max: ' + maxScore + ')');
-        collectQuizPages();
+        collectArticles();
     }
 
     kickOff();

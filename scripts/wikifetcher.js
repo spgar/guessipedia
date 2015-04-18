@@ -5,27 +5,26 @@
 var WikiFetcher = function() {
     'use strict';
 
-    function getFetchExtractURL(pageName) {
+    function getFetchArticleExtractURL(title) {
         var urlBase = 'http://en.wikipedia.org/w/api.php?';
         var urlOptions = 'format=json&action=query&prop=extracts&exintro&explaintext';
-        var urlTitle = '&titles=' + pageName.replace(' ', '%20');
+        var urlTitle = '&titles=' + title.replace(' ', '%20');
         var urlCallback = '&callback=?';
         return urlBase + urlOptions + urlTitle + urlCallback;
     }
 
-    function fetchPageExtract(pageName, callback) {
+    function fetchArticleExtract(title, id, callback) {
         $.ajax({
             type: 'GET',
-            url: getFetchExtractURL(pageName),
+            url: getFetchArticleExtractURL(title),
             contentType: 'application/json; charset=utf-8',
             async: false,
             dataType: 'jsonp',
 
             success: function(data) {
-                // SPGTODO: Should be only one
                 for (var id in data.query.pages) {
                     if (data.query.pages.hasOwnProperty(id)) {
-                        callback(pageName, data.query.pages[id].extract);
+                        callback(title, id, data.query.pages[id].extract);
                     }
                 }
             },
@@ -36,23 +35,23 @@ var WikiFetcher = function() {
         });
     }
 
-    function getRandomPageURL() {
+    function getRandomArticleURL() {
         var urlBase = 'http://en.wikipedia.org/w/api.php?';
         var urlParameters = 'action=query&list=random&format=json&rnnamespace=0&rnlimit=1';
         var urlCallback = '&callback=?';
         return urlBase + urlParameters + urlCallback;
     }
 
-    var fetchRandomPage = function(callback) {
+    var fetchRandomArticle = function(callback) {
         $.ajax({
             type: 'GET',
-            url: getRandomPageURL(),
+            url: getRandomArticleURL(),
             contentType: 'application/json; charset=utf-8',
             async: false,
             dataType: 'jsonp',
 
             success: function(data) {
-                fetchPageExtract(data.query.random[0].title, callback);
+                fetchArticleExtract(data.query.random[0].title, data.query.random[0].id, callback);
             },
 
             error: function(errorMessage) {
@@ -62,6 +61,6 @@ var WikiFetcher = function() {
     };
 
     return {
-        fetchRandomPage: fetchRandomPage
+        fetchRandomArticle: fetchRandomArticle
     };
 };
