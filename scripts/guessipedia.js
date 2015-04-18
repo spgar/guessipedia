@@ -152,6 +152,9 @@ $(document).ready(function() {
     }
 
     function finishedCollectingArticles() {
+        // Hide the loading spinner.
+        $.mobile.loading('hide');
+
         // Show the hint.
         var sentences = articles[0].extractSentences;
         $('#hint').html('Hint: ' + sentences[randomInt(0, sentences.length - 1)]);
@@ -228,6 +231,13 @@ $(document).ready(function() {
     }
 
     function kickOff() {
+        // Show the loading spinner.
+        $.mobile.loading('show', {
+            text: 'loading',
+            textVisible: true,
+            theme: 'z',
+            html: ''
+        });
         clearQuiz();
         collectArticles();
     }
