@@ -209,7 +209,6 @@ $(document).ready(function() {
 
     function clearQuiz() {
         articles = [];
-        setScore(0);
         $('#hint').empty();
         $('#result').empty();
         $('#continue').empty();
@@ -221,5 +220,6 @@ $(document).ready(function() {
         collectArticles();
     }
 
+    setScore(0);
     kickOff();
 });
