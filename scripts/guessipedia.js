@@ -185,8 +185,14 @@ $(document).ready(function() {
         $('#score').html('Score: ' + score + ' (max: ' + maxScore + ')');
     }
 
+    function scrollToResult() {
+        $('body').animate({ scrollTop: $('#result').offset().top}, 1000);
+    }
+
     function correctAnswer() {
-        $('#result').html('Correct!');
+        $('#result').html('Correct! Learn more about: ' + getCorrectAnswerLink());
+        scrollToResult();
+
         setScore(score + 1);
         addContinueButton('Next Round');
     }
@@ -198,8 +204,9 @@ $(document).ready(function() {
 
     function incorrectAnswer() {
         $('#result').html('WRONG. Correct answer: ' + getCorrectAnswerLink());
-        setScore(0);
+        scrollToResult();
 
+        setScore(0);
         addContinueButton('Start Over');
     }
 
